@@ -73,14 +73,31 @@ app.get('/posts', (req, res) => {
             data += chunk;
         });
 
-        // The whole response has been received.
+
+
+         // The whole response has been received.
         response.on('end', () => {
             if (response.statusCode >= 200 && response.statusCode < 300) {
-                res.json(JSON.parse(data));
+                // Parse the JSON data
+                const jsonData = JSON.parse(data);
+
+                // Style the JSON data here
+                const styledData = jsonData.map(post => ({
+                    userId: post.userId,
+                    id: post.id,
+                    title: post.title,
+                    body: post.body
+                    // Add any styling logic here if needed
+                }));
+
+                // Send the styled JSON data as response
+                res.json(styledData);
             } else {
+                // If response status code is not in 200 range, send error message
                 res.status(response.statusCode).json({ message: `Error: ${response.statusCode}` });
             }
         });
+        
     }).on('error', error => {
         res.status(500).json({ message: error.message });
     }).end();
