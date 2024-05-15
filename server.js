@@ -1,7 +1,7 @@
 const Prometheus = require('prom-client')
 const express = require('express');
 const http = require('http');
-const fetch = require('node-fetch');
+const https = require('https');
 
 Prometheus.collectDefaultMetrics();
 
@@ -57,17 +57,33 @@ app.get('/', (req, res) => {
   res.send('Hello from Node.js Starter Application! - JDS');
 });
 
-app.get('/posts', async (req, res) => {
-    try {
-        const response = await fetch('https://jsonplaceholder.typicode.com/posts');
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        const data = await response.json();
-        res.json(data);
-    } catch (error) {
+app.get('/posts', (req, res) => {
+    const options = {
+        hostname: 'jsonplaceholder.typicode.com',
+        port: 443,
+        path: '/posts',
+        method: 'GET'
+    };
+
+    https.request(options, response => {
+        let data = '';
+
+        // A chunk of data has been received.
+        response.on('data', chunk => {
+            data += chunk;
+        });
+
+        // The whole response has been received.
+        response.on('end', () => {
+            if (response.statusCode >= 200 && response.statusCode < 300) {
+                res.json(JSON.parse(data));
+            } else {
+                res.status(response.statusCode).json({ message: `Error: ${response.statusCode}` });
+            }
+        });
+    }).on('error', error => {
         res.status(500).json({ message: error.message });
-    }
+    }).end();
 });
 
 app.get('*', (req, res) => {
