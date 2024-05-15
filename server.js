@@ -82,16 +82,17 @@ app.get('/posts', (req, res) => {
                 const jsonData = JSON.parse(data);
 
                 // Style the JSON data here
-                const styledData = jsonData.map(post => ({
-                    userId: post.userId,
-                    id: post.id,
-                    title: post.title,
-                    body: post.body
-                    // Add any styling logic here if needed
-                }));
+                // Format the JSON data with paragraphs
+                const formattedData = jsonData.map(post => (
+                    `<p><strong>User ID:</strong> ${post.userId}</p>` +
+                    `<p><strong>ID:</strong> ${post.id}</p>` +
+                    `<p><strong>Title:</strong> ${post.title}</p>` +
+                    `<p><strong>Body:</strong> ${post.body}</p><br>`
+                )).join('');
 
-                // Send the styled JSON data as response
-                res.json(styledData);
+                // Send the formatted JSON data as HTML response
+                res.send(`<div>${formattedData}</div>`);
+                
             } else {
                 // If response status code is not in 200 range, send error message
                 res.status(response.statusCode).json({ message: `Error: ${response.statusCode}` });
