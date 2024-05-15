@@ -1,6 +1,7 @@
 const Prometheus = require('prom-client')
 const express = require('express');
 const http = require('http');
+const fetch = require('node-fetch');
 
 Prometheus.collectDefaultMetrics();
 
@@ -54,6 +55,19 @@ app.get('/', (req, res) => {
   // Use req.log (a `pino` instance) to log JSON:
   req.log.info({message: 'Hello from Node.js Starter Application! - JDS'});
   res.send('Hello from Node.js Starter Application! - JDS');
+});
+
+app.get('/posts', async (req, res) => {
+    try {
+        const response = await fetch('https://jsonplaceholder.typicode.com/posts');
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
 });
 
 app.get('*', (req, res) => {
